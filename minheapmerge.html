@@ -262,7 +262,7 @@
     
     <div class="container">
         <div>
-            <h3 style="text-align: center;">Output Sorted List</h3>
+            <h3 style="text-align: center;">Output Sorted List <span id="comparison-counter" style="font-weight: normal; font-size: 0.9em; color: #aaa; margin-left: 10px;">Comparisons: 0</span></h3>
             <div class="output-wrapper" id="outputWrapper">
                 <div class="output-section" id="output"></div>
             </div>
@@ -312,6 +312,7 @@
     
     let output = [];
     let state = 'INIT'; 
+    let comparisonCount = 0;
     
     // Animation State
     let siftIndex = 0; // Current node being sifted down
@@ -374,6 +375,8 @@
         state = 'POP';
         siftIndex = -1;
         compareTarget = -1;
+        comparisonCount = 0;
+        updateComparisonDisplay();
         
         render();
         updateStatus("Initialized Min-Heap. Root is the smallest element.");
@@ -435,12 +438,20 @@
             let smallest = siftIndex;
 
             // Check Left
-            if (left < K && heap[left].val < heap[smallest].val) {
-                smallest = left;
+            if (left < K) {
+                comparisonCount++;
+                updateComparisonDisplay();
+                if (heap[left].val < heap[smallest].val) {
+                    smallest = left;
+                }
             }
             // Check Right
-            if (right < K && heap[right].val < heap[smallest].val) {
-                smallest = right;
+            if (right < K) {
+                comparisonCount++;
+                updateComparisonDisplay();
+                if (heap[right].val < heap[smallest].val) {
+                    smallest = right;
+                }
             }
 
             // If we found a smaller child
@@ -477,6 +488,11 @@
 
     function valStr(item) {
         return item.val === Infinity ? '∞' : item.val;
+    }
+
+    function updateComparisonDisplay() {
+        const el = document.getElementById('comparison-counter');
+        if(el) el.innerText = `Comparisons: ${comparisonCount}`;
     }
 
     // --- Play / Pause Logic ---

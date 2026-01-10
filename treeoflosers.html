@@ -265,7 +265,7 @@
     
     <div class="container">
         <div>
-            <h3 style="text-align: center;">Output Sorted List</h3>
+            <h3 style="text-align: center;">Output Sorted List <span id="comparison-counter" style="font-weight: normal; font-size: 0.9em; color: #aaa; margin-left: 10px;">Comparisons: 0</span></h3>
             <div class="output-wrapper" id="outputWrapper">
                 <div class="output-section" id="output"></div>
             </div>
@@ -314,10 +314,16 @@
     let state = 'INIT'; 
     let replayPath = []; 
     let currentReplayIdx = 0;
+    let comparisonCount = 0;
     
     // Auto Play State
     let isPlaying = false;
     let playTimer = null;
+
+    function updateComparisonDisplay() {
+        const el = document.getElementById('comparison-counter');
+        if(el) el.innerText = `Comparisons: ${comparisonCount}`;
+    }
 
     function mulberry32(a) {
         return function() {
@@ -361,6 +367,9 @@
         let nodeWinners = new Array(2 * K).fill(-1);
         for(let i=0; i<K; i++) nodeWinners[K+i] = i;
 
+        comparisonCount = 0;
+        updateComparisonDisplay();
+
         for(let i = 2*K - 1; i > 1; i -= 2) {
             let left = nodeWinners[i-1];
             let right = nodeWinners[i];
@@ -368,6 +377,9 @@
             
             let valL = getVal(left);
             let valR = getVal(right);
+
+            comparisonCount++;
+            updateComparisonDisplay();
 
             if (valL < valR) {
                 tree[parent] = right; // Store loser
@@ -444,6 +456,9 @@
             let valStored = getVal(loserStored);
 
             let msg = `Node ${nodeIdx}: Stream ${winnerIndex} (${valChallenger === Infinity ? 'Inf' : valChallenger}) vs S${loserStored} (${valStored === Infinity ? 'Inf' : valStored})`;
+
+            comparisonCount++;
+            updateComparisonDisplay();
 
             if (valChallenger > valStored) {
                 tree[nodeIdx] = winnerIndex;

@@ -280,7 +280,7 @@
     
     <div class="container">
         <div>
-            <h3 style="text-align: center;">Output Sorted List</h3>
+            <h3 style="text-align: center;">Output Sorted List <span id="comparison-counter" style="font-weight: normal; font-size: 0.9em; color: #aaa; margin-left: 10px;">Comparisons: 0</span></h3>
             <div class="output-wrapper" id="outputWrapper">
                 <div class="output-section" id="output"></div>
             </div>
@@ -331,10 +331,16 @@
     let state = 'INIT'; 
     let replayPath = []; 
     let currentReplayIdx = 0;
+    let comparisonCount = 0;
     
     // Auto Play State
     let isPlaying = false;
     let playTimer = null;
+
+    function updateComparisonDisplay() {
+        const el = document.getElementById('comparison-counter');
+        if(el) el.innerText = `Comparisons: ${comparisonCount}`;
+    }
 
     function mulberry32(a) {
         return function() {
@@ -379,6 +385,9 @@
             tree[K + i] = i; // Leaf nodes point to stream indices
         }
 
+        comparisonCount = 0;
+        updateComparisonDisplay();
+
         // Build Tree (Bottom-Up)
         // Compare children, winner moves to parent
         for(let i = K - 1; i > 0; i--) {
@@ -397,6 +406,9 @@
     function getWinner(streamIdxA, streamIdxB) {
         if (streamIdxA === null) return streamIdxB; // For animation empty states
         if (streamIdxB === null) return streamIdxA;
+
+        comparisonCount++;
+        updateComparisonDisplay();
 
         let valA = getVal(streamIdxA);
         let valB = getVal(streamIdxB);

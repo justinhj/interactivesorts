@@ -41,3 +41,7 @@ Note that you need to use pwd to get the actual path for direct file access if t
     *   CSS variables are used for theming (colors for nodes, highlights, etc.).
     *   JavaScript is contained in a `<script>` block at the bottom of the body.
     *   The `init()`, `step()`, and `render()` pattern is used to manage the simulation loop.
+
+## Invariants
+*   **Deterministic Randomness:** All three visualizations (`minheapmerge.html`, `treeofwinners.html`, `treeoflosers.html`) implement a deterministic seeded random number generator (`mulberry32`). This allows users to input a specific seed (default `123`) and produce identical streams of data across all applications for side-by-side comparison.
+*   **Stream Count (K):** All visualizations are configured with `K=8` streams to ensure the generated datasets are identical in size and content when using the same seed.

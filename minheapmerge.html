@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>K-Way Merge: Min-Heap Visualization</title>
+    <style>
+        :root {
+            --bg-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --node-bg: #333;
+            --node-border: #555;
+            --highlight-base: #2196f3; /* Blue */
+            --highlight-compare: #ff9800; /* Orange */
+            --highlight-swap: #e91e63; /* Pink */
+            --highlight-sorted: #4caf50; /* Green */
+            --stream-bg: #2d2d2d;
+            --scrollbar-bg: #252525;
+            --scrollbar-thumb: #555;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 { margin-bottom: 20px; }
+        h3 { margin: 0 0 10px 0; color: #aaa; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Controls Grid */
+        .controls {
+            margin: 10px 0 20px 0;
+            width: 800px;
+            display: grid;
+            grid-template-columns: 100px 100px 160px 1fr 100px; 
+            gap: 15px;
+            align-items: center;
+            z-index: 10; 
+        }
+
+        button {
+            width: 100%;
+            height: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            background-color: var(--highlight-base);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover { background-color: #1976d2; }
+        button:disabled { background-color: #555; cursor: not-allowed; }
+        
+        button.play-btn { background-color: var(--highlight-sorted); }
+        button.play-btn.paused { background-color: #ff9800; } 
+
+        .status-box {
+            background-color: #333;
+            height: 50px;
+            padding: 0 10px;
+            border-radius: 4px;
+            border: 1px solid #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: bold;
+            font-size: 13px;
+            line-height: 1.2;
+        }
+
+        /* Slider Control */
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #333;
+            height: 50px;
+            border-radius: 4px;
+            border: 1px solid #555;
+            padding: 0 10px;
+        }
+        
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            font-size: 10px;
+            color: #aaa;
+            margin-top: 2px;
+        }
+
+        input[type=range] { width: 100%; cursor: pointer; }
+
+        /* Layout */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px; 
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        /* Output Array */
+        .output-wrapper {
+            width: 800px;
+            height: 60px; 
+            background-color: #252525;
+            border: 1px dashed #444;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            overflow-x: auto; 
+            overflow-y: hidden;
+            display: flex;
+            align-items: center; 
+        }
+        
+        .output-wrapper::-webkit-scrollbar { height: 8px; }
+        .output-wrapper::-webkit-scrollbar-track { background: var(--scrollbar-bg); border-radius: 4px; }
+        .output-wrapper::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+        
+        /* THIS WAS MISSING PREVIOUSLY */
+        .output-section {
+            display: flex;
+            gap: 5px;
+            padding-right: 10px;
+        }
+
+        .output-item {
+            padding: 5px 10px;
+            background-color: var(--highlight-sorted);
+            color: white;
+            border-radius: 3px;
+            font-size: 14px;
+            flex-shrink: 0; 
+        }
+
+        /* Tree Visualization */
+        .tree-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 0; 
+        }
+
+        .node {
+            width: 50px;
+            height: 50px;
+            background-color: var(--node-bg);
+            border: 2px solid var(--node-border);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        .node span.val { font-size: 14px; font-weight: bold; }
+        .node span.idx { font-size: 10px; color: #aaa; }
+
+        /* Node States */
+        .node.comparing { border-color: var(--highlight-compare); box-shadow: 0 0 10px var(--highlight-compare); }
+        .node.swapping { background-color: var(--highlight-swap); border-color: var(--highlight-swap); transform: scale(1.1); }
+        .node.popped { border-color: var(--highlight-sorted); background-color: #1b5e20; }
+        .node.replacing { border-color: var(--highlight-base); background-color: #0d47a1; }
+
+        /* Connecting Lines */
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+        line {
+            stroke: #555;
+            stroke-width: 2;
+            transition: stroke 0.3s;
+        }
+
+        /* Input Streams */
+        .streams-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: -10px; 
+            padding-top: 10px;
+            z-index: 2;
+        }
+        
+        .stream {
+            display: flex;
+            flex-direction: column;
+            width: 60px;
+            background-color: var(--stream-bg);
+            border: 1px solid #444;
+            padding: 5px;
+            align-items: center;
+        }
+
+        .stream-header { font-weight: bold; margin-bottom: 5px; font-size: 12px; }
+        
+        .stream-item {
+            width: 100%;
+            text-align: center;
+            padding: 2px 0;
+            border-bottom: 1px solid #444;
+            font-size: 14px;
+        }
+        .stream-item:first-child { background-color: #444; } 
+        .stream-item.popped { opacity: 0.3; text-decoration: line-through; }
+
+    </style>
+</head>
+<body>
+
+    <h1>K-Way Merge: Min-Heap</h1>
+    
+    <div class="container">
+        <div>
+            <h3 style="text-align: center;">Output Sorted List</h3>
+            <div class="output-wrapper" id="outputWrapper">
+                <div class="output-section" id="output"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="stepBtn" onclick="step()">Step</button>
+            <button id="playBtn" class="play-btn" onclick="togglePlay()">Play</button>
+            
+            <div class="slider-container">
+                <input type="range" id="speedSlider" min="100" max="2000" value="1000" step="100">
+                <div class="slider-labels">
+                    <span>Fast</span>
+                    <span>Med</span>
+                    <span>Slow</span>
+                </div>
+            </div>
+
+            <div class="status-box" id="status">Ready to initialize...</div>
+            <button onclick="reset()">Reset</button>
+        </div>
+
+        <div class="tree-container" id="treeContainer" style="width: 800px; height: 320px;">
+            <svg id="lines"></svg>
+        </div>
+
+        <div class="streams-container" id="streams">
+            </div>
+    </div>
+
+<script>
+    // --- Configuration ---
+    // Using 7 to make a perfect binary tree (1 root, 2 children, 4 grandkids)
+    const K = 7; 
+    const STREAM_LENGTH = 5;
+    
+    // --- State ---
+    let streams = [];
+    
+    // Heap storage. 0-indexed array.
+    // Elements are objects: { val: number, streamId: number }
+    let heap = []; 
+    
+    let output = [];
+    let state = 'INIT'; 
+    
+    // Animation State
+    let siftIndex = 0; // Current node being sifted down
+    let compareTarget = -1; // Node being compared against
+    
+    // Auto Play State
+    let isPlaying = false;
+    let playTimer = null;
+
+    // UI Coordinates for Heap (Fixed positions)
+    const nodeCoords = [
+        {x: 400, y: 60},   // 0 (Root)
+        {x: 200, y: 140},  // 1
+        {x: 600, y: 140},  // 2
+        {x: 100, y: 220},  // 3
+        {x: 300, y: 220},  // 4
+        {x: 500, y: 220},  // 5
+        {x: 700, y: 220}   // 6
+    ];
+
+    function init() {
+        // 1. Generate Sorted Streams
+        streams = [];
+        for(let i=0; i<K; i++) {
+            let arr = [];
+            let base = Math.floor(Math.random() * 20);
+            for(let j=0; j<STREAM_LENGTH; j++) {
+                base += Math.floor(Math.random() * 10) + 1;
+                arr.push(base);
+            }
+            streams.push({ id: i, data: arr, headIdx: 0 });
+        }
+
+        // 2. Initialize Heap with heads of all streams
+        heap = [];
+        for(let i=0; i<K; i++) {
+            let val = getStreamVal(i);
+            heap.push({ val: val, streamId: i });
+        }
+
+        // 3. Heapify (Floyd's algorithm - bottom up)
+        // For visualization simplicity in Init, we just sort it immediately.
+        heap.sort((a, b) => a.val - b.val);
+
+        output = [];
+        state = 'POP';
+        siftIndex = -1;
+        compareTarget = -1;
+        
+        render();
+        updateStatus("Initialized Min-Heap. Root is the smallest element.");
+    }
+
+    function getStreamVal(streamIdx) {
+        if (streamIdx === -1) return Infinity;
+        let s = streams[streamIdx];
+        if (s.headIdx >= s.data.length) return Infinity;
+        return s.data[s.headIdx];
+    }
+
+    function step() {
+        if (state === 'INIT') {
+            init(); 
+            return true;
+        }
+
+        if (state === 'POP') {
+            if (heap[0].val === Infinity) {
+                updateStatus("Merge Complete!");
+                stopPlay();
+                document.getElementById('stepBtn').disabled = true;
+                return false; 
+            }
+
+            // Move Root to Output
+            let rootItem = heap[0];
+            output.push(rootItem.val);
+            
+            // Advance the stream that produced this item
+            streams[rootItem.streamId].headIdx++;
+            
+            updateStatus(`Popped ${rootItem.val} from S${rootItem.streamId}.`);
+            state = 'REPLACE';
+            render();
+            return true;
+        }
+
+        if (state === 'REPLACE') {
+            // Get next value from the same stream
+            let streamId = heap[0].streamId;
+            let nextVal = getStreamVal(streamId);
+            
+            // Update Root with new value 
+            heap[0] = { val: nextVal, streamId: streamId };
+            
+            updateStatus(`Fetched next value (${nextVal === Infinity ? '∞' : nextVal}) from S${streamId}. Starting Sift Down...`);
+            
+            siftIndex = 0; // Start sifting from root
+            state = 'SIFT_COMPARE';
+            render();
+            return true;
+        }
+
+        if (state === 'SIFT_COMPARE') {
+            let left = 2 * siftIndex + 1;
+            let right = 2 * siftIndex + 2;
+            let smallest = siftIndex;
+
+            // Check Left
+            if (left < K && heap[left].val < heap[smallest].val) {
+                smallest = left;
+            }
+            // Check Right
+            if (right < K && heap[right].val < heap[smallest].val) {
+                smallest = right;
+            }
+
+            // If we found a smaller child
+            if (smallest !== siftIndex) {
+                compareTarget = smallest;
+                updateStatus(`Comparing: Parent (${valStr(heap[siftIndex])}) > Child (${valStr(heap[smallest])}). Need Swap.`);
+                state = 'SIFT_SWAP';
+            } else {
+                updateStatus(`Parent is smaller than children. Heap property restored.`);
+                state = 'POP'; // Cycle complete
+            }
+            render();
+            return true;
+        }
+
+        if (state === 'SIFT_SWAP') {
+            // Perform the swap
+            let temp = heap[siftIndex];
+            heap[siftIndex] = heap[compareTarget];
+            heap[compareTarget] = temp;
+
+            updateStatus(`Swapped ${valStr(heap[siftIndex])} with ${valStr(heap[compareTarget])}. Continuing Sift Down.`);
+            
+            // Advance sift index
+            siftIndex = compareTarget;
+            compareTarget = -1;
+            state = 'SIFT_COMPARE';
+            render();
+            return true;
+        }
+
+        return false;
+    }
+
+    function valStr(item) {
+        return item.val === Infinity ? '∞' : item.val;
+    }
+
+    // --- Play / Pause Logic ---
+
+    function togglePlay() {
+        if (isPlaying) {
+            stopPlay();
+        } else {
+            startPlay();
+        }
+    }
+
+    function startPlay() {
+        if (document.getElementById('stepBtn').disabled) return; 
+        isPlaying = true;
+        const btn = document.getElementById('playBtn');
+        btn.innerText = "Pause";
+        btn.classList.add('paused');
+        document.getElementById('stepBtn').disabled = true;
+        runLoop();
+    }
+
+    function stopPlay() {
+        isPlaying = false;
+        clearTimeout(playTimer);
+        const btn = document.getElementById('playBtn');
+        btn.innerText = "Play";
+        btn.classList.remove('paused');
+        
+        if (state !== 'FINISHED' && heap[0].val !== Infinity) {
+            document.getElementById('stepBtn').disabled = false;
+        }
+    }
+
+    function runLoop() {
+        if (!isPlaying) return;
+        const keepGoing = step();
+        if (keepGoing) {
+            const speed = parseInt(document.getElementById('speedSlider').value);
+            playTimer = setTimeout(runLoop, speed);
+        } else {
+            stopPlay();
+        }
+    }
+
+    // --- Rendering ---
+
+    function render() {
+        const treeContainer = document.getElementById('treeContainer');
+        const linesSvg = document.getElementById('lines');
+        const streamsContainer = document.getElementById('streams');
+        const outputDiv = document.getElementById('output');
+        const outputWrapper = document.getElementById('outputWrapper');
+
+        // Clear existing
+        Array.from(document.querySelectorAll('.node')).forEach(e => e.remove());
+        linesSvg.innerHTML = '';
+
+        // Draw Nodes
+        heap.forEach((item, idx) => {
+            if (idx >= K) return; // Should not happen with fixed K
+            
+            let coords = nodeCoords[idx];
+            let div = document.createElement('div');
+            div.className = 'node';
+            div.style.left = (coords.x - 25) + 'px';
+            div.style.top = (coords.y - 25) + 'px';
+            
+            div.innerHTML = `<span class="val">${item.val === Infinity ? '∞' : item.val}</span><span class="idx">S${item.streamId}</span>`;
+
+            // State styling
+            if (state === 'POP' && idx === 0) div.classList.add('popped');
+            if (state === 'REPLACE' && idx === 0) div.classList.add('replacing');
+            if (state === 'SIFT_COMPARE' && (idx === siftIndex || idx === 2*siftIndex+1 || idx === 2*siftIndex+2)) {
+                 div.classList.add('comparing');
+            }
+            if (state === 'SIFT_SWAP' && (idx === siftIndex || idx === compareTarget)) {
+                div.classList.add('swapping');
+            }
+
+            treeContainer.appendChild(div);
+
+            // Draw Lines to children
+            let leftIdx = 2 * idx + 1;
+            let rightIdx = 2 * idx + 2;
+            
+            if (leftIdx < K) {
+                let childCoords = nodeCoords[leftIdx];
+                drawLine(coords.x, coords.y, childCoords.x, childCoords.y);
+            }
+            if (rightIdx < K) {
+                let childCoords = nodeCoords[rightIdx];
+                drawLine(coords.x, coords.y, childCoords.x, childCoords.y);
+            }
+        });
+
+        // Render Streams
+        streamsContainer.innerHTML = '';
+        streams.forEach(s => {
+            let sDiv = document.createElement('div');
+            sDiv.className = 'stream';
+            let header = document.createElement('div');
+            header.className = 'stream-header';
+            header.innerText = `S${s.id}`;
+            sDiv.appendChild(header);
+
+            s.data.forEach((val, idx) => {
+                let item = document.createElement('div');
+                item.className = 'stream-item';
+                item.innerText = val;
+                if (idx < s.headIdx) item.classList.add('popped');
+                sDiv.appendChild(item);
+            });
+            streamsContainer.appendChild(sDiv);
+        });
+
+        // Render Output
+        outputDiv.innerHTML = '';
+        output.forEach(val => {
+            let d = document.createElement('div');
+            d.className = 'output-item';
+            d.innerText = val;
+            outputDiv.appendChild(d);
+        });
+        
+        outputWrapper.scrollLeft = outputWrapper.scrollWidth;
+    }
+
+    function drawLine(x1, y1, x2, y2) {
+        let line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', x1);
+        line.setAttribute('y1', y1);
+        line.setAttribute('x2', x2);
+        line.setAttribute('y2', y2);
+        document.getElementById('lines').appendChild(line);
+    }
+
+    function updateStatus(msg) {
+        document.getElementById('status').innerText = msg;
+    }
+
+    function reset() {
+        window.location.reload();
+    }
+
+    init();
+
+</script>
+</body>
+</html>

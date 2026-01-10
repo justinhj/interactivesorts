@@ -42,6 +42,11 @@ Note that you need to use pwd to get the actual path for direct file access if t
     *   JavaScript is contained in a `<script>` block at the bottom of the body.
     *   The `init()`, `step()`, and `render()` pattern is used to manage the simulation loop.
 
+## Algorithm Comparison
+*   **Cumulative Comparison Counter:** Each visualization includes a counter that tracks the total number of comparisons performed.
+    *   This allows for quantitative comparison of the efficiency of each algorithm (e.g., comparing how many comparisons the Tree of Losers saves compared to the standard Min-Heap or Tree of Winners).
+    *   The counter resets when the "Reset" button is clicked and increments in real-time as nodes are compared.
+
 ## Invariants
 *   **Deterministic Randomness:** All three visualizations (`minheapmerge.html`, `treeofwinners.html`, `treeoflosers.html`) implement a deterministic seeded random number generator (`mulberry32`). This allows users to input a specific seed (default `123`) and produce identical streams of data across all applications for side-by-side comparison.
 *   **Stream Count (K):** All visualizations are configured with `K=8` streams to ensure the generated datasets are identical in size and content when using the same seed.

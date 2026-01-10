@@ -7,6 +7,7 @@ The project consists of standalone HTML files, each visualizing a specific appro
 *   **Min-Heap Merge:** Uses a standard Min-Heap to select the smallest element among the streams.
 *   **Tree of Winners:** Uses a tournament tree where the winner (smallest element) rises to the root.
 *   **Tree of Losers:** A variation of the tournament tree where the loser is stored at each internal node, often providing slightly better efficiency by reducing comparisons.
+*   **Linear Scan:** A simple approach that scans all K candidates at each step to find the smallest.
 
 ## Usage
 These are static, standalone HTML files. No build server, compiler, or package manager is required.
@@ -17,6 +18,7 @@ To run the visualizations:
     *   `open minheapmerge.html`
     *   `open treeoflosers.html`
     *   `open treeofwinners.html`
+    *   `open linearscan.html`
 
 ## Testing
 To take screenshots and test the code you can use the playwright tool to open and manipulate each application.
@@ -33,6 +35,7 @@ Note that you need to use pwd to get the actual path for direct file access if t
 *   **`minheapmerge.html`**: Visualizes the K-Way merge using a binary Min-Heap. Shows the "Sift Down" process when the root is replaced.
 *   **`treeofwinners.html`**: Visualizes the Tree of Winners (Tournament Tree). Shows how the winner at each level bubbles up to the root.
 *   **`treeoflosers.html`**: Visualizes the Tree of Losers. Demonstrates how storing the "loser" of a match allows the winner to proceed, often simplifying the replay path.
+*   **`linearscan.html`**: Visualizes the K-Way merge using a simple linear scan. Demonstrates the baseline efficiency against which tree-based methods can be compared.
 
 ## Development Conventions
 *   **Stack:** Plain HTML5, CSS3, and Vanilla JavaScript (ES6+).
@@ -48,5 +51,5 @@ Note that you need to use pwd to get the actual path for direct file access if t
     *   The counter resets when the "Reset" button is clicked and increments in real-time as nodes are compared.
 
 ## Invariants
-*   **Deterministic Randomness:** All three visualizations (`minheapmerge.html`, `treeofwinners.html`, `treeoflosers.html`) implement a deterministic seeded random number generator (`mulberry32`). This allows users to input a specific seed (default `123`) and produce identical streams of data across all applications for side-by-side comparison.
+*   **Deterministic Randomness:** All four visualizations (`minheapmerge.html`, `treeofwinners.html`, `treeoflosers.html`, `linearscan.html`) implement a deterministic seeded random number generator (`mulberry32`). This allows users to input a specific seed (default `123`) and produce identical streams of data across all applications for side-by-side comparison.
 *   **Stream Count (K):** All visualizations are configured with `K=8` streams to ensure the generated datasets are identical in size and content when using the same seed.

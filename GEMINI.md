@@ -21,9 +21,14 @@ To run the visualizations:
 ## Testing
 To take screenshots and test the code you can use the playwright tool to open and manipulate each application.
 
-For example to view the minheapmerge.html page and take a screen shot you can browse to the link file:///Users/justinhj/projects/interactivesorts/treeofwinners.html
+Since these files use modern web features and local file access may be restricted by browser security policies, it is recommended to serve them using a local HTTP server.
 
-Note that you need to use pwd to get the actual path.
+You can use Python's built-in server:
+1. Open a terminal in the project directory.
+2. Run: `python3 -m http.server 8000`
+3. Navigate to: `http://localhost:8000/minheapmerge.html` (or other files)
+
+Note that you need to use pwd to get the actual path for direct file access if the browser allows it.
 ## Key Files
 *   **`minheapmerge.html`**: Visualizes the K-Way merge using a binary Min-Heap. Shows the "Sift Down" process when the root is replaced.
 *   **`treeofwinners.html`**: Visualizes the Tree of Winners (Tournament Tree). Shows how the winner at each level bubbles up to the root.

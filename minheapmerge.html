@@ -290,7 +290,7 @@
             <button onclick="reset()">Reset</button>
         </div>
 
-        <div class="tree-container" id="treeContainer" style="width: 800px; height: 320px;">
+        <div class="tree-container" id="treeContainer" style="width: 800px; height: 400px;">
             <svg id="lines"></svg>
         </div>
 
@@ -300,8 +300,7 @@
 
 <script>
     // --- Configuration ---
-    // Using 7 to make a perfect binary tree (1 root, 2 children, 4 grandkids)
-    const K = 7; 
+    const K = 8; 
     const STREAM_LENGTH = 5;
     
     // --- State ---
@@ -339,7 +338,8 @@
         {x: 100, y: 220},  // 3
         {x: 300, y: 220},  // 4
         {x: 500, y: 220},  // 5
-        {x: 700, y: 220}   // 6
+        {x: 700, y: 220},  // 6
+        {x: 50, y: 300}    // 7
     ];
 
     function init() {

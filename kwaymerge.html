@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K-Way Merge Visualizations</title>
+    <style>
+        :root {
+            --bg-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --card-bg: #2d2d2d;
+            --card-border: #444;
+            --highlight-base: #2196f3;
+            --highlight-hover: #1976d2;
+            --muted-text: #aaa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+
+        .subtitle {
+            color: var(--muted-text);
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+            text-align: center;
+            max-width: 600px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 24px;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: var(--highlight-base);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .card h2 {
+            margin: 0 0 12px 0;
+            color: var(--highlight-base);
+            font-size: 1.5rem;
+        }
+
+        .card p {
+            margin: 0;
+            line-height: 1.6;
+            color: var(--text-color);
+            flex-grow: 1;
+        }
+
+        .card .tag {
+            margin-top: 16px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--muted-text);
+            font-weight: bold;
+        }
+
+        footer {
+            margin-top: 60px;
+            color: var(--muted-text);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>K-Way Merge</h1>
+    <p class="subtitle">Interactive visualizations demonstrating different data structures and algorithms for merging multiple sorted streams.</p>
+
+    <div class="container">
+        <a href="linearscan.html" class="card">
+            <h2>Linear Scan</h2>
+            <p>A simple approach that scans all K candidates at each step to find the smallest. Serves as the baseline for comparison.</p>
+            <span class="tag">O(K) per step</span>
+        </a>
+
+        <a href="minheapmerge.html" class="card">
+            <h2>Min-Heap Merge</h2>
+            <p>Uses a standard binary Min-Heap to select the smallest element. Shows the "Sift Down" process when the root is replaced.</p>
+            <span class="tag">O(log K) per step</span>
+        </a>
+
+        <a href="treeofwinners.html" class="card">
+            <h2>Tree of Winners</h2>
+            <p>Uses a tournament tree where the smallest element rises to the root through a series of matches at each level.</p>
+            <span class="tag">Tournament Tree</span>
+        </a>
+
+        <a href="treeoflosers.html" class="card">
+            <h2>Tree of Losers</h2>
+            <p>A variation of the tournament tree where losers are stored at internal nodes, simplifying the replay path to the root.</p>
+            <span class="tag">Optimized Tournament</span>
+        </a>
+    </div>
+
+    <footer>
+        Deterministic Seeded Randomness (mulberry32) &bull; K=8 Streams
+    </footer>
+
+</body>
+</html>
